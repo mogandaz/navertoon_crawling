@@ -18,7 +18,7 @@ def crawl_main_page():
         webtoon_url = dom.cssselect("h6[class='challengeTitle'] a")
 
         for url in webtoon_url:
-            if url.get('href')[32:] in titleIDs:
+            if url.get('href')[32:] in toon_ids:
                 end = True
                 break
             else:
@@ -79,3 +79,6 @@ def crawl_toon_page(toon_id):
             data_table.append(record)
 
     return data_table
+
+for i in crawl_main_page():
+    crawl_toon_page(i)
