@@ -60,7 +60,7 @@ def crawl_toon_page(toon_id):
             view_cnt = ep_dom.cssselect("dd[class='date']")[1].text_content()
 
             record = {
-                "webtoon_id"] : toon_id,
+                "webtoon_id" : toon_id,
                 "title" : title,
                 "author" : author,
                 "ep_id" : idx,
