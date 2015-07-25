@@ -1,9 +1,10 @@
 import lxml.html
 import requests
+import datetime
 
 def crawl_main_page():
 
-    titleIDs = []
+    toon_ids = []
     pageID = 1
 
     while True:
@@ -21,14 +22,14 @@ def crawl_main_page():
                 end = True
                 break
             else:
-                titleIDs.append(url.get('href')[32:])
+                toon_ids.append(url.get('href')[32:])
 
         if end:
             break
 
         pageID += 1
 
-    return titleIDs
+    return toon_ids
 
 def crawl_toon_page(toon_id):
 
@@ -40,9 +41,9 @@ def crawl_toon_page(toon_id):
 
     author = dom.cssselect("div[class='detail'] h2 span")[0].text_content()
     title = dom.cssselect("div[class='detail'] h2")[0].text_content()[:-len(author)]
-    ep_cnt = int(dom.cssselect("td[class='title'] a")[0].get('href')[44:])
+    ep_cnt = int(dom.cssselect("td[class='title'] a")[0].get('href')[38+len(toon_id):])
 
-    for idx in range(2,ep_cnt):
+    for idx in range(2,ep_cnt+1):
         record = {}
 
         ep_url = "http://comic.naver.com/bestChallenge/detail.nhn?titleId=" + str(toon_id) + "&no=" + str(idx)
@@ -50,31 +51,31 @@ def crawl_toon_page(toon_id):
         ep_html_string = ep_response.text
         ep_dom = lxml.html.fromstring(ep_html_string)
 
-        record["webtoon_id"] = toon_id
-        record["title"] = title
-        record["author"] = author
-        record["ep_id"] = idx
+        if ep_dom.cssselect("span[id='topPointTotalNumber']"):
 
 
-        stars = ep_dom.cssselect("span[id='topPointTotalNumber']")[0].text_content()
-        stars_join = ep_dom.cssselect("span[class='pointTotalPerson'] em")[0].text_content()
-        reg_date = ep_dom.cssselect("dd[class='date']")[0].text_content()
-        view_cnt = ep_dom.cssselect("dd[class='date']")[1].text_content()
+            stars = ep_dom.cssselect("span[id='topPointTotalNumber']")[0].text_content()
+            stars_join = ep_dom.cssselect("span[class='pointTotalPerson'] em")[0].text_content()
+            reg_date = ep_dom.cssselect("dd[class='date']")[0].text_content()
+            view_cnt = ep_dom.cssselect("dd[class='date']")[1].text_content()
 
-        record["stars"] = stars
-        record["stars_join"] = stars_join
-        record["reg_date"] = reg_date
-        record["view_cnt"] = view_cnt
+            record = {
+                "webtoon_id"] : toon_id,
+                "title" : title,
+                "author" : author,
+                "ep_id" : idx,
+                "stars" : stars,
+                "stars_join" : stars_join,
+                "reg_date" : reg_date,
+                "view_cnt" : view_cnt,
+                "crawl_date" : datetime.date.today().strftime("20%y.%m.%d"),
+            }
 
-        cm_url = "http://comic.naver.com/ncomment/ncomment.nhn?titleId="+ str(toon_id) + "&no=" + str(idx) + "&levelName=BEST_CHALLENGE"
-        cm_response = requests.get(cm_url)
-        cm_html_string = cm_response.text
-        cm_dom = lxml.html.fromstring(cm_html_string)
+#            cm_url = "http://comic.naver.com/ncomment/ncomment.nhn?titleId="+ str(toon_id) + "&no=" + str(idx) + "&levelName=BEST_CHALLENGE"
+#            cm_response = requests.get(cm_url)
+#            cm_html_string = cm_response.text
+#            cm_dom = lxml.html.fromstring(cm_html_string)
 
-        data_table.append(record)
-
-#    for i in data_table:
-#        for key, value in i.iteritems():
-#            print key + " " , value
+            data_table.append(record)
 
     return data_table
