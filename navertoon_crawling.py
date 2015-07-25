@@ -9,7 +9,6 @@ def crawl_main_page():
     while True:
         end = False
         base_url = "http://comic.naver.com/genre/bestChallenge.nhn?&page="
-        print "***********" + str(pageID) + "*************"
 
         response = requests.get(base_url + str(pageID))
         html_string = response.text
@@ -22,7 +21,6 @@ def crawl_main_page():
                 end = True
                 break
             else:
-                print type(url.get('href')[32:])
                 titleIDs.append(url.get('href')[32:])
 
         if end:
@@ -57,6 +55,26 @@ def crawl_toon_page(toon_id):
         record["author"] = author
         record["ep_id"] = idx
 
+
+        stars = ep_dom.cssselect("span[id='topPointTotalNumber']")[0].text_content()
+        stars_join = ep_dom.cssselect("span[class='pointTotalPerson'] em")[0].text_content()
+        reg_date = ep_dom.cssselect("dd[class='date']")[0].text_content()
+        view_cnt = ep_dom.cssselect("dd[class='date']")[1].text_content()
+
+        record["stars"] = stars
+        record["stars_join"] = stars_join
+        record["reg_date"] = reg_date
+        record["view_cnt"] = view_cnt
+
+        cm_url = "http://comic.naver.com/ncomment/ncomment.nhn?titleId="+ str(toon_id) + "&no=" + str(idx) + "&levelName=BEST_CHALLENGE"
+        cm_response = requests.get(cm_url)
+        cm_html_string = cm_response.text
+        cm_dom = lxml.html.fromstring(cm_html_string)
+
         data_table.append(record)
+
+#    for i in data_table:
+#        for key, value in i.iteritems():
+#            print key + " " , value
 
     return data_table
