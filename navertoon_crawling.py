@@ -1,3 +1,5 @@
+#-*- coding: utf-8 -*-
+
 import lxml.html
 import requests
 import datetime
@@ -40,7 +42,8 @@ def crawl_toon_page(toon_id):
     dom = lxml.html.fromstring(html_string)
 
     author = dom.cssselect("div[class='detail'] h2 span")[0].text_content()
-    title = dom.cssselect("div[class='detail'] h2")[0].text_content()[:-len(author)]
+    title = str(dom.cssselect("div[class='detail'] h2")[0].text_content()[:-len(author)].encode('euc-kr'))
+    print type(title)
     ep_cnt = int(dom.cssselect("td[class='title'] a")[0].get('href')[38+len(toon_id):])
 
     for idx in range(2,ep_cnt+1):
@@ -80,5 +83,7 @@ def crawl_toon_page(toon_id):
 
     return data_table
 
-for i in crawl_main_page():
-    crawl_toon_page(i)
+
+#crawl_toon_page(raw_input())
+#for i in crawl_main_page():
+#    crawl_toon_page(i)
