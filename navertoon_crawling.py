@@ -3,6 +3,7 @@
 import lxml.html
 import requests
 import datetime
+import csv
 
 def crawl_main_page():
 
@@ -43,7 +44,6 @@ def crawl_toon_page(toon_id):
 
     author = dom.cssselect("div[class='detail'] h2 span")[0].text_content()
     title = str(dom.cssselect("div[class='detail'] h2")[0].text_content()[:-len(author)].encode('euc-kr'))
-    print type(title)
     ep_cnt = int(dom.cssselect("td[class='title'] a")[0].get('href')[38+len(toon_id):])
 
     for idx in range(2,ep_cnt+1):
@@ -83,7 +83,15 @@ def crawl_toon_page(toon_id):
 
     return data_table
 
+def print_crawled(data_table):
+    keys = data_table[0].keys()
+    with open('webtoon.csv', 'wb') as output_file:
+        dict_writer = csv.DictWriter(output_file, keys)
+        dict_writer.writeheader()
+        dict_writer.writerows(data_table)
 
-#crawl_toon_page(raw_input())
-#for i in crawl_main_page():
-#    crawl_toon_page(i)
+if __name__ == '__main__':
+    data_table = []
+    for i in crawl_main_page():
+        data_table.extend(crawl_toon_page(i))
+    print_crawled(data_table)
